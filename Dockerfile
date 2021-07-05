@@ -16,4 +16,4 @@ RUN pip install -r requirements.txt
 
 RUN apk --no-cache del build-base
 
-
+CMD ["python", "app.py"]

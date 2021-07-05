@@ -1,5 +1,4 @@
 FROM arm32v7/python:3.7-alpine3.13
-
 RUN mkdir /app
 WORKDIR /app
 COPY requirements.txt /requirements.txt
@@ -12,5 +11,3 @@ RUN apk --no-cache del build-base
 
 ENV PYTHONUNBUFFERED 1
 COPY . /app/
-
-CMD ["python", "app.py"]

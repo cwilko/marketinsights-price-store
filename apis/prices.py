@@ -47,7 +47,7 @@ class Prices(Resource):
     def get(self, market_id):
 
         try:
-            results = mds.getHDF("test.hdf", market_id)
+            results = mds.getHDF("datasources/test.hdf", market_id)
             results = results.to_json(orient='split', date_format="iso")
         except Exception as e:
             results = {"rc": "fail", "msg": str(e)}
@@ -59,7 +59,7 @@ class Prices(Resource):
         data = pandas.read_json(json.dumps(body), orient='split')
 
         try:
-            mds.appendHDF("test.hdf", market_id, data, "H")
+            mds.appendHDF("datasources/test.hdf", market_id, data, "H")
             body = {"rc": "success"}
         except ValueError as e:
             body = {"rc": "fail", "msg": str(e)}
@@ -72,7 +72,7 @@ class Prices(Resource):
         data = pandas.read_json(json.dumps(body), orient='split')
 
         try:
-            mds.appendHDF("test.hdf", market_id, data, "H", update=True)
+            mds.appendHDF("datasources/test.hdf", market_id, data, "H", update=True)
             body = {"rc": "success"}
         except ValueError as e:
             body = {"rc": "fail", "msg": str(e)}
@@ -80,5 +80,5 @@ class Prices(Resource):
         return body
 
     def delete(self, market_id):
-        mds.deleteHDF("test.hdf", market_id)
+        mds.deleteHDF("datasources/test.hdf", market_id)
         return {"rc": "success"}

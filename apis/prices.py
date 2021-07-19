@@ -56,7 +56,8 @@ class Prices(Resource):
 
         args = self.parser.parse_args()
         data = pandas.read_json(json.dumps(request.get_json()), orient='split')
-        data.index = data.index.tz_localize('UTC')
+        # Uncomment the following on pandas < 1.2.0
+        # data.index = data.index.tz_localize('UTC')
 
         try:
             mds.appendHDF(source_id, data, args["unit"])
@@ -72,7 +73,8 @@ class Prices(Resource):
 
         args = self.parser.parse_args()
         data = pandas.read_json(json.dumps(request.get_json()), orient='split')
-        data.index = data.index.tz_localize('UTC')
+        # Uncomment the following on pandas < 1.2.0
+        # data.index = data.index.tz_localize('UTC')
 
         try:
             mds.appendHDF(source_id, data, args["unit"], update=True)

@@ -27,8 +27,10 @@ class AggregatePrices(Resource):
         end = args["end"] if args["end"] else "2050-01-01"
 
         try:
-            results = mds.loadMarketData(start, end, args["sources"], args["unit"])
-            results = results.to_json(orient='split', date_format="iso")
+            results = mds.aggregate(start, end, args["sources"], args["unit"])
+            if results is not None:
+                results = results.to_json(orient='split', date_format="iso")
+            results = {"rc": "success", "body": results}
         except Exception as e:
             results = {"rc": "fail", "msg": str(e)}
         return jsonify(results)
@@ -44,8 +46,10 @@ class Prices(Resource):
     def get(self, source_id):
 
         try:
-            results = mds.getHDF(source_id)
-            results = results.to_json(orient='split', date_format="iso")
+            results = mds.get(source_id)
+            if results is not None:
+                results = results.to_json(orient='split', date_format="iso")
+            results = {"rc": "success", "body": results}
         except Exception as e:
             results = {"rc": "fail", "msg": str(e)}
         return jsonify(results)
@@ -60,7 +64,7 @@ class Prices(Resource):
         # data.index = data.index.tz_localize('UTC')
 
         try:
-            mds.appendHDF(source_id, data, args["unit"])
+            mds.append(source_id, data, args["unit"])
             results = {"rc": "success"}
         except ValueError as e:
             results = {"rc": "fail", "msg": str(e)}
@@ -77,7 +81,7 @@ class Prices(Resource):
         # data.index = data.index.tz_localize('UTC')
 
         try:
-            mds.appendHDF(source_id, data, args["unit"], update=True)
+            mds.append(source_id, data, args["unit"], update=True)
             results = {"rc": "success"}
         except ValueError as e:
             results = {"rc": "fail", "msg": str(e)}
@@ -88,7 +92,7 @@ class Prices(Resource):
     def delete(self, source_id):
 
         try:
-            mds.deleteHDF(source_id)
+            mds.delete(source_id)
             results = {"rc": "success"}
         except Exception as e:
             results = {"rc": "fail", "msg": str(e)}

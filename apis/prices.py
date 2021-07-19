@@ -1,4 +1,4 @@
-from flask_restx import Resource, fields, reqparse, Namespace
+from flask_restx import Resource, reqparse, Namespace
 from flask import jsonify, request
 from quantutils.api.datasource import MarketDataStore
 import pandas
@@ -8,77 +8,86 @@ mds = MarketDataStore("./datasources")
 
 api = Namespace('prices', description='Price operations')
 
-# model the input data
-price_data = api.model('Provide the price data:',
-                       {
-                           "market": fields.String,
-                           "data": fields.List(fields.List(fields.Float)),
-                           "tz": fields.String,
-                           "index": fields.List(fields.String)
-                       })
 
-
-@api.route('/<market_id>')
-@api.response(404, 'Market not found')
-class Prices(Resource):
+@api.route('/aggregate')
+class AggregatePrices(Resource):
 
     parser = reqparse.RequestParser()
-    parser.add_argument('start')
-    parser.add_argument('end')
+    parser.add_argument('start', help='Start timestamp (optional)')
+    parser.add_argument('end', help='End timestamp (optional)')
+    parser.add_argument('unit', required=True, help='Sample unit for requested data, e.g: 1H, 5min')
+    parser.add_argument('sources', action='append', required=True, help='Precedence ordered list of datasources to read from')
 
-    @api.doc(params={'start': 'Start timestamp', 'end': 'End timestamp'})
-    def get_backup(self, market_id):
+    @api.expect(parser, validate=True)
+    @api.doc(description='Get prices based on an aggregation of datasources')
+    def get(self):
 
         args = self.parser.parse_args()
-
-        assets = {
-            "markets": [market_id],
-            "start": args["start"] if args["start"] else "1979-01-01",
-            "end": args["end"] if args["end"] else "2050-01-01",
-        }
-
-        data = mds.loadMarketData(assets, "H")
-        if market_id in data:
-            results = data[market_id].to_json(orient='split', date_format="iso")
-        else:
-            api.abort(404)
-        return jsonify(results)
-
-    def get(self, market_id):
+        start = args["start"] if args["start"] else "1979-01-01"
+        end = args["end"] if args["end"] else "2050-01-01"
 
         try:
-            results = mds.getHDF("datasources/test.hdf", market_id)
+            results = mds.loadMarketData(start, end, args["sources"], args["unit"])
             results = results.to_json(orient='split', date_format="iso")
         except Exception as e:
             results = {"rc": "fail", "msg": str(e)}
         return jsonify(results)
 
-    def post(self, market_id):
 
-        body = request.get_json()
-        data = pandas.read_json(json.dumps(body), orient='split')
+@api.route('/datasource/<source_id>')
+class Prices(Resource):
 
-        try:
-            mds.appendHDF("datasources/test.hdf", market_id, data, "H")
-            body = {"rc": "success"}
-        except ValueError as e:
-            body = {"rc": "fail", "msg": str(e)}
+    parser = reqparse.RequestParser()
+    parser.add_argument('unit', required=True, help='Sample unit for datasource, e.g: 1H, 5min')
 
-        return body
-
-    def put(self, market_id):
-
-        body = request.get_json()
-        data = pandas.read_json(json.dumps(body), orient='split')
+    @api.doc(description='Get price data from a datasource')
+    def get(self, source_id):
 
         try:
-            mds.appendHDF("datasources/test.hdf", market_id, data, "H", update=True)
-            body = {"rc": "success"}
+            results = mds.getHDF(source_id)
+            results = results.to_json(orient='split', date_format="iso")
+        except Exception as e:
+            results = {"rc": "fail", "msg": str(e)}
+        return jsonify(results)
+
+    @api.expect(parser, validate=True)
+    @api.doc(description='Add new price data to a datasource')
+    def post(self, source_id):
+
+        args = self.parser.parse_args()
+        data = pandas.read_json(json.dumps(request.get_json()), orient='split')
+        data.index = data.index.tz_localize('UTC')
+
+        try:
+            mds.appendHDF(source_id, data, args["unit"])
+            results = {"rc": "success"}
         except ValueError as e:
-            body = {"rc": "fail", "msg": str(e)}
+            results = {"rc": "fail", "msg": str(e)}
 
-        return body
+        return jsonify(results)
 
-    def delete(self, market_id):
-        mds.deleteHDF("datasources/test.hdf", market_id)
-        return {"rc": "success"}
+    @api.expect(parser, validate=True)
+    @api.doc(description='Add or update existing price data for a datasource')
+    def put(self, source_id):
+
+        args = self.parser.parse_args()
+        data = pandas.read_json(json.dumps(request.get_json()), orient='split')
+        data.index = data.index.tz_localize('UTC')
+
+        try:
+            mds.appendHDF(source_id, data, args["unit"], update=True)
+            results = {"rc": "success"}
+        except ValueError as e:
+            results = {"rc": "fail", "msg": str(e)}
+
+        return jsonify(results)
+
+    @api.doc(description='Remove a datasource and all its existing price data')
+    def delete(self, source_id):
+
+        try:
+            mds.deleteHDF(source_id)
+            results = {"rc": "success"}
+        except Exception as e:
+            results = {"rc": "fail", "msg": str(e)}
+        return jsonify(results)

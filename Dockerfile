@@ -17,4 +17,4 @@ RUN apt-get -y update && \
 
 RUN pip install --extra-index-url https://www.piwheels.org/simple -r requirements.txt
 
-CMD ["python", "app.py"]
+CMD ["python", "-u", "app.py"]

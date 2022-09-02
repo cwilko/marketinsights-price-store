@@ -1,16 +1,12 @@
 from flask_restx import Resource, reqparse, Namespace
 from flask import jsonify, request
 from quantutils.api.datasource import MarketDataStore
-from quantutils.api.marketinsights import TradeFramework
 import pandas
 import json
-import uuid
 
 mds = MarketDataStore("./datasources")
 
 api = Namespace('prices', description='Price operations')
-
-subscriptions = {}
 
 
 @api.route('/aggregate')
@@ -65,14 +61,10 @@ class Prices(Resource):
         args = self.parser.parse_args()
         data = pandas.read_json(json.dumps(request.get_json()), orient='split')
         # Uncomment the following on pandas < 1.2.0
-        data.index = data.index.tz_localize('UTC')
+        # data.index = data.index.tz_localize('UTC')
 
         try:
             mds.append(source_id, data, args["unit"])
-
-            # If any subs registered the publish updates
-            self.updateSubscriptions(source_id, data.index[0], data.index[-1])
-
             results = {"rc": "success"}
         except ValueError as e:
             results = {"rc": "fail", "msg": str(e)}
@@ -86,14 +78,10 @@ class Prices(Resource):
         args = self.parser.parse_args()
         data = pandas.read_json(json.dumps(request.get_json()), orient='split')
         # Uncomment the following on pandas < 1.2.0
-        data.index = data.index.tz_localize('UTC')
+        # data.index = data.index.tz_localize('UTC')
 
         try:
             mds.append(source_id, data, args["unit"], update=True)
-
-            # If any subs registered the publish updates
-            self.updateSubscriptions(source_id, data.index[0], data.index[-1])
-
             results = {"rc": "success"}
         except ValueError as e:
             results = {"rc": "fail", "msg": str(e)}
@@ -108,46 +96,4 @@ class Prices(Resource):
             results = {"rc": "success"}
         except Exception as e:
             results = {"rc": "fail", "msg": str(e)}
-        return jsonify(results)
-
-    def updateSubscriptions(source_id, start, end):
-        try:
-            data = mds.aggregate(start, end, args["sources"], args["unit"])
-            if data is not None:
-                data = data.to_json(orient='split', date_format="iso")
-            tf = TradeFramework(subscription["url"])
-            tf.appendAsset(env_uuid, market, data)
-        except Exception as e:
-            results = {"rc": "fail", "msg": str(e)}
-        return jsonify(results)
-
-
-@api.route('/aggregate/subscription/')
-class Subscription(Resource):
-
-    parser = reqparse.RequestParser()
-    parser.add_argument('unit', required=True, help='Sample unit for requested data, e.g: 1H, 5min')
-    parser.add_argument('sources', action='append', required=True, help='Precedence ordered list of datasources to read from')
-    parser.add_argument('url', required=True, help='URL for webhook registration', location='json')
-    # parser.add_argument('history', required=True, help='Boolean value to indicate whether historical prices should be returned on registration')
-
-    @api.expect(parser, validate=True)
-    @api.doc(description='Register a webook for notifications on an aggregation of datasources')
-    def post(self):
-        args = self.parser.parse_args()
-        data = request.get_json()
-        if data["url"]:
-
-            # Store subscription info
-            s_uuid = str(uuid.uuid4())
-            subscriptions[s_uuid] = {
-                "id": uuid,
-                "sources": args["sources"],
-                "unit": args["unit"],
-                "url": data["url"]
-            }
-            results = {"rc": "success", "result": subscriptions[s_uuid]}
-        else:
-            results = {"rc": "fail", "msg": "URL not provided"}
-
         return jsonify(results)

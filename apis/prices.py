@@ -29,7 +29,7 @@ class AggregatePrices(Resource):
         try:
             results = mds.aggregate(args["sources"], args["unit"], start, end, True)
             if results is not None:
-                results = results.to_json(orient='split', date_format="iso")
+                results = results.reset_index().to_json(orient='split', date_format="iso")
             results = {"rc": "success", "body": results}
         except Exception as e:
             results = {"rc": "fail", "msg": str(e)}
@@ -48,7 +48,7 @@ class Prices(Resource):
         try:
             results = mds.get(source_id)
             if results is not None:
-                results = results.to_json(orient='split', date_format="iso")
+                results = results.reset_index().to_json(orient='split', date_format="iso")
             results = {"rc": "success", "body": results}
         except Exception as e:
             results = {"rc": "fail", "msg": str(e)}
@@ -59,7 +59,7 @@ class Prices(Resource):
     def post(self, source_id):
 
         args = self.parser.parse_args()
-        data = pandas.read_json(json.dumps(request.get_json()), orient='split')
+        data = pandas.read_json(json.dumps(request.get_json()), orient='split').set_index(["Date_Time", "ID"])
         # Uncomment the following on pandas < 1.2.0
         # data.index = data.index.tz_localize('UTC')
 
@@ -76,7 +76,7 @@ class Prices(Resource):
     def put(self, source_id):
 
         args = self.parser.parse_args()
-        data = pandas.read_json(json.dumps(request.get_json()), orient='split')
+        data = pandas.read_json(json.dumps(request.get_json()), orient='split').set_index(["Date_Time", "ID"])
         # Uncomment the following on pandas < 1.2.0
         # data.index = data.index.tz_localize('UTC')
 

@@ -9,6 +9,20 @@ mds = MarketDataStore("./datasources")
 api = Namespace('prices', description='Price operations')
 
 
+@api.route('/keys')
+class Keys(Resource):
+
+    @api.doc(description='Get all datastore tables')
+    def get(self, source_id):
+
+        try:
+            results = mds.getKeys()
+            results = {"rc": "success", "body": results}
+        except Exception as e:
+            results = {"rc": "fail", "msg": str(e)}
+        return jsonify(results)
+
+
 @api.route('/aggregate')
 class AggregatePrices(Resource):
 

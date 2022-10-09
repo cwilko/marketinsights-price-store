@@ -5,7 +5,7 @@ from apis import api
 import os
 
 app = Flask(__name__)
-app.config["MAX_CONTENT_LENGTH"] = 64 * 1024 * 1024  # 64 MB
+app.config["MAX_CONTENT_LENGTH"] = 256 * 1024 * 1024  # 256 MB
 api.init_app(app)
 # SSLify(app)
 # CORS(app)

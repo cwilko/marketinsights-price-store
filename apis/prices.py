@@ -27,7 +27,7 @@ class AggregatePrices(Resource):
         end = args["end"] if args["end"] else "2050-01-01"
 
         try:
-            results = mds.aggregate(start, end, args["sources"], args["unit"])
+            results = mds.aggregate(args["sources"], args["unit"], start, end, True)
             if results is not None:
                 results = results.to_json(orient='split', date_format="iso")
             results = {"rc": "success", "body": results}

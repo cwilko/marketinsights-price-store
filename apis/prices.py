@@ -13,7 +13,7 @@ api = Namespace('prices', description='Price operations')
 class Keys(Resource):
 
     @api.doc(description='Get all datastore tables')
-    def get(self, source_id):
+    def get(self):
 
         try:
             results = mds.getKeys()

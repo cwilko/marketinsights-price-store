@@ -67,7 +67,7 @@ class Prices(Resource):
     @api.doc(description='Add new price data to a datasource')
     def post(self, table_id):
 
-        data = pandas.read_json(json.dumps(request.get_json()), orient='split').set_index(["Date_Time", "ID"])
+        data = pandas.read_json(json.dumps(request.get_json()), orient='split', dtype=False).set_index(["Date_Time", "ID"])
         # Uncomment the following on pandas < 1.2.0
         # data.index = data.index.tz_localize('UTC')
 
@@ -82,7 +82,7 @@ class Prices(Resource):
     @api.doc(description='Add or update existing price data for a datasource')
     def put(self, table_id):
 
-        data = pandas.read_json(json.dumps(request.get_json()), orient='split').set_index(["Date_Time", "ID"])
+        data = pandas.read_json(json.dumps(request.get_json()), orient='split', dtype=False).set_index(["Date_Time", "ID"])
         # Uncomment the following on pandas < 1.2.0
         # data.index = data.index.tz_localize('UTC')
 

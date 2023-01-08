@@ -1,10 +1,10 @@
 from flask_restx import Resource, reqparse, Namespace
 from flask import jsonify, request
-from quantutils.api.datasource import MarketDataStore
+from MIPriceStore.api.datasource import MIDataStore
 import pandas
 import json
 
-mds = MarketDataStore("./datasources")
+mds = MIDataStore("./datastore")
 
 api = Namespace('prices', description='Price operations')
 

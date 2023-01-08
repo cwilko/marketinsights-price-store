@@ -1,4 +1,4 @@
-quantutils @ git+https://github.com/cwilko/quantutils.git#egg=quantutils
+MIPriceStore @ git+https://github.com/cwilko/marketinsights-price-store.git#egg=MIPriceStore
 Flask>=1.1.4 
 flasgger>=0.6.4 
 Flask-Cors>=3.0.2  

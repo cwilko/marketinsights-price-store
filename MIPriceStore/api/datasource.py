@@ -183,7 +183,7 @@ class MIDataStore:
         return data
 
 
-class MIDataStoreRemote():
+class MIDataStoreRemote:
 
     def __init__(self, endpoint):
         self.mdsRemote = PriceStore(endpoint)

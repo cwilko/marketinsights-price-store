@@ -4,7 +4,8 @@ from MIPriceStore.api.datasource import MIDataStore
 import pandas
 import json
 
-mds = MIDataStore("./datastore")
+# Any change to the following needs a change to the PVC location
+mds = MIDataStore("./datasources")
 
 api = Namespace('prices', description='Price operations')
 

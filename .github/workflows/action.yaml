@@ -28,4 +28,4 @@ jobs:
           context: docker
           push: true
           platforms: linux/arm/v7
-          tags: user/app:arm32v7
+          tags: cwilko/marketinsights-price-store:arm32v7

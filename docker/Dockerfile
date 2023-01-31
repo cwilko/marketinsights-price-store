@@ -1,7 +1,5 @@
 FROM arm32v7/python:3.7-slim-buster
 
-COPY qemu-arm-static /usr/bin
-
 ENV PYTHONUNBUFFERED=1
 ENV HDF5_USE_FILE_LOCKING=FALSE
 

@@ -1,4 +1,8 @@
-FROM arm32v7/python:3.7-slim-buster
+FROM arm64v8/python:3.7-slim-buster as target-arm64
+
+FROM arm32v7/python:3.7-slim-buster as target-armv7
+
+FROM target-$TARGETOS$TARGETARCH
 
 ENV PYTHONUNBUFFERED=1
 ENV HDF5_USE_FILE_LOCKING=FALSE

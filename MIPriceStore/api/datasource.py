@@ -1,7 +1,7 @@
 import pandas
 import quantutils.dataset.pipeline as ppl
 from quantutils.core.decorators import synchronized
-from quantutils.api.marketinsights import PriceStore
+from quantutils.api.datasource import MIDataStoreRemote
 import json
 import sys
 
@@ -181,36 +181,3 @@ class MIDataStore:
         finally:
             hdfStore.close()
         return data
-
-
-class MIDataStoreRemote:
-
-    def __init__(self, endpoint):
-        self.mdsRemote = PriceStore(endpoint)
-
-    def aggregate(self, table_id, sources, start="1979-01-01", end="2050-01-01", debug=False):
-        results = self.mdsRemote.aggregate(table_id, sources, start, end, debug)
-        if (results["rc"] == "success" and results["body"] is not None):
-            return pandas.read_json(results["body"], orient="split", dtype=False).set_index(["Date_Time", "ID"])
-        return pandas.DataFrame()
-
-    def get(self, table_id, debug=False):
-        results = self.mdsRemote.get(table_id, debug)
-        if (results["rc"] == "success" and results["body"] is not None):
-            return pandas.read_json(results["body"], orient="split", dtype=False).set_index(["Date_Time", "ID"])
-        return pandas.DataFrame()
-
-    def append(self, table_id, data, update=False, debug=False):
-        if update:
-            return self.mdsRemote.put(table_id, data.reset_index().to_json(orient='split', date_format="iso"), debug)
-        else:
-            return self.mdsRemote.post(table_id, data.reset_index().to_json(orient='split', date_format="iso"), debug)
-
-    def delete(self, table_id, debug=False):
-        return self.mdsRemote.delete(table_id, debug)
-
-    def getKeys(self, debug=False):
-        results = self.mdsRemote.getKeys(debug)
-        if (results["rc"] == "success" and results["body"] is not None):
-            return results["body"]
-        return None

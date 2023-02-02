@@ -12,6 +12,7 @@ RUN apt-get -y update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+RUN pip install wheel
 RUN pip install -r requirements.txt
 
 CMD ["python", "-u", "app.py"]

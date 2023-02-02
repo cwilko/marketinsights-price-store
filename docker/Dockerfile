@@ -1,4 +1,4 @@
-FROM arm64v8/python:3.9-slim-bullseye as target-arm64
+FROM arm64v8/python:3.9-slim-bullseye 
 
 ENV PYTHONUNBUFFERED=1
 ENV HDF5_USE_FILE_LOCKING=FALSE
@@ -7,10 +7,6 @@ RUN mkdir -p /usr/app
 COPY . /usr/app
 WORKDIR /usr/app
 
-RUN apt-get -y update && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN pip install --extra-index-url https://www.piwheels.org/simple -r requirements.txt
+RUN pip install -r requirements.txt
 
 CMD ["python", "-u", "app.py"]

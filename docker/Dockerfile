@@ -7,6 +7,8 @@ RUN mkdir -p /usr/app
 COPY . /usr/app
 WORKDIR /usr/app
 
+RUN apk add --no-cache --update git
+
 RUN pip install wheel
 RUN pip install -r requirements.txt
 

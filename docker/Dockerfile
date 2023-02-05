@@ -1,4 +1,4 @@
-FROM arm64v8/python:3.9-slim-bullseye 
+FROM arm64v8/python:3.9-alpine
 
 ENV PYTHONUNBUFFERED=1
 ENV HDF5_USE_FILE_LOCKING=FALSE

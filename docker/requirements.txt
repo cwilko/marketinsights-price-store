@@ -1,13 +1,4 @@
-MIPriceStore @ git+https://github.com/cwilko/marketinsights-price-store.git#egg=MIPriceStore
-Flask>=1.1.4 
-flasgger>=0.6.4 
-Flask-Cors>=3.0.2  
-Flask-SSLify>=0.1.5
-flask-restx>=0.4.0
-gevent>=1.2.1
-toolz>=0.9.0
-Werkzeug==0.16.1
+marketinsights-price-store @ git+https://github.com/cwilko/marketinsights-price-store.git
 numpy==1.21.4
 pandas==1.3.5
-requests==2.27.1
 #tables==3.6.1 - No longer needed for arm64

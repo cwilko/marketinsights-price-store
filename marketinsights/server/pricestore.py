@@ -1,19 +1,28 @@
-from flask_restx import Resource, reqparse, Namespace
+from flask_restx import Api, Resource, reqparse, Namespace
 from flask import jsonify, request
-from MIPriceStore.api.datasource import MIDataStore
+from marketinsights.api.datasource import MIDataStore
 import pandas
 import json
 
 # Any change to the following needs a change to the PVC location
 mds = MIDataStore("./datasources")
 
-api = Namespace('prices', description='Price operations')
+api = Api(
+    title='Price Store API',
+    version='1.0',
+    description='MarketInsights Price Store API',
+    # All API metadatas
+)
+
+ns = Namespace('prices', description='Price operations')
+
+api.add_namespace(ns)
 
 
-@api.route('/keys')
+@ns.route('/keys')
 class Keys(Resource):
 
-    @api.doc(description='Get all datastore tables')
+    @ns.doc(description='Get all datastore tables')
     def get(self):
 
         try:
@@ -24,7 +33,7 @@ class Keys(Resource):
         return jsonify(results)
 
 
-@api.route('/aggregate/<table_id>')
+@ns.route('/aggregate/<table_id>')
 class AggregatePrices(Resource):
 
     parser = reqparse.RequestParser()
@@ -32,8 +41,8 @@ class AggregatePrices(Resource):
     parser.add_argument('end', help='End timestamp (optional)')
     parser.add_argument('sources', action='append', required=True, help='Precedence ordered list of datasources to read from')
 
-    @api.expect(parser, validate=True)
-    @api.doc(description='Get prices based on an aggregation of datasources')
+    @ns.expect(parser, validate=True)
+    @ns.doc(description='Get prices based on an aggregation of datasources')
     def get(self, table_id):
 
         args = self.parser.parse_args()
@@ -50,10 +59,10 @@ class AggregatePrices(Resource):
         return jsonify(results)
 
 
-@api.route('/datasource/<table_id>')
+@ns.route('/datasource/<table_id>')
 class Prices(Resource):
 
-    @api.doc(description='Get price data from a datasource')
+    @ns.doc(description='Get price data from a datasource')
     def get(self, table_id):
 
         try:
@@ -65,7 +74,7 @@ class Prices(Resource):
             results = {"rc": "fail", "msg": str(e)}
         return jsonify(results)
 
-    @api.doc(description='Add new price data to a datasource')
+    @ns.doc(description='Add new price data to a datasource')
     def post(self, table_id):
 
         data = pandas.read_json(json.dumps(request.get_json()), orient='split', dtype=False).set_index(["Date_Time", "ID"])
@@ -80,7 +89,7 @@ class Prices(Resource):
 
         return jsonify(results)
 
-    @api.doc(description='Add or update existing price data for a datasource')
+    @ns.doc(description='Add or update existing price data for a datasource')
     def put(self, table_id):
 
         data = pandas.read_json(json.dumps(request.get_json()), orient='split', dtype=False).set_index(["Date_Time", "ID"])
@@ -95,7 +104,7 @@ class Prices(Resource):
 
         return jsonify(results)
 
-    @api.doc(description='Remove a datasource and all its existing price data')
+    @ns.doc(description='Remove a datasource and all its existing price data')
     def delete(self, table_id):
 
         try:

@@ -34,7 +34,12 @@ setup(
     install_requires=requirements,
 
     extras_require={
-        'server': ['Flask>=1.1.4', 'flasgger>=0.6.4', 'Flask-Cors>=3.0.2', 'flask-restx>=0.4.0', 'Flask-SSLify>=0.1.5', 'gevent>=1.2.1', 'toolz>=0.9.0', 'Werkzeug==0.16.1', 'requests==2.27.1']
+        'server': ['Flask>=2.2.3', 'Flask-Cors>=3.0.10', 'flask-restx>=1.1.0', 'Flask-SSLify>=0.1.5']
+
+        # Successfully installed Flask-2.2.3 Werkzeug-2.2.3 aniso8601-9.0.1
+        # click-8.1.3 Flask-Cors-3.0.10 Flask-SSLify-0.1.5 flask-restx-1.1.0
+        # importlib-metadata-6.0.0 itsdangerous-2.1.2 jsonschema-4.17.3
+
     },
 
     # You can just specify package directories manually here if your project is

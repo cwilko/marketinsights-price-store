@@ -27,6 +27,8 @@ jobs:
 
       - name: Test with pytest
         run: |
-          python ./docker/app.py &
+          cd ./docker
+          python ./app.py &
           sleep 5
+          cd ../
           pytest ./test/unittest/test_pricestore.py 

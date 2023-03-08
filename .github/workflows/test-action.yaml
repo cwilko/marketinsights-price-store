@@ -30,5 +30,4 @@ jobs:
           mkdir datasources
           python ./docker/app.py &
           sleep 5
-          cd ../
           pytest ./test/unittest/test_pricestore.py 

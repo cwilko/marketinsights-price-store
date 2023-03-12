@@ -1,4 +1,4 @@
-import pandas
+import pandas as pd
 import quantutils.dataset.pipeline as ppl
 from quantutils.core.decorators import synchronized
 from quantutils.api.datasource import MIDataStoreRemote
@@ -21,7 +21,15 @@ class MIDataStore:
     # Load data from an ordered list of sources
     def aggregate(self, table_id, sources, start="1979-01-01", end="2050-01-01", debug=False):
 
-        hdfStore = pandas.HDFStore(self.hdfFile, 'r')
+        hdfStore = pd.HDFStore(self.hdfFile, 'r')
+
+        # Adjust end date to be "inclusive" - to match pandas indexing
+        if end.strip().find(" ") < 0:
+            end = str(pd.Timestamp(end) + pd.Timedelta("1D"))
+        elif end.strip().find(":") < 0:
+            end = str(pd.Timestamp(end) + pd.Timedelta("1H"))
+        else:
+            end = str(pd.Timestamp(end) + pd.Timedelta("1M"))
 
         try:
             marketData = None
@@ -35,7 +43,7 @@ class MIDataStore:
                     print("Loading data from {} in {}".format(source, self.hdfFile))
 
                     # Load Dataframe from store
-                    select_stmt = ''.join(["ID='", source, "' and Date_Time>'", start, "' and Date_Time<='", end, "'"])
+                    select_stmt = ''.join(["ID='", source, "' and Date_Time>='", start, "' and Date_Time<'", end, "'"])
                     tsData = hdfStore.select(datasource, where=select_stmt)
 
                     if not tsData.empty:
@@ -57,7 +65,7 @@ class MIDataStore:
                             #tsData = ppl.resample(tsData, sample_unit)
 
                         if marketData is None:
-                            marketData = pandas.DataFrame(index=pandas.MultiIndex(levels=[[], []], codes=[[], []], names=[u'Date_Time', u'ID']))
+                            marketData = pd.DataFrame(index=pd.MultiIndex(levels=[[], []], codes=[[], []], names=[u'Date_Time', u'ID']))
 
                         marketData = ppl.merge(tsData, marketData)
                 else:
@@ -71,7 +79,7 @@ class MIDataStore:
     def append(self, table_id, data, update=False, debug=False):
 
         # Get HDFStore
-        hdfStore = pandas.HDFStore(self.hdfFile, 'a')
+        hdfStore = pd.HDFStore(self.hdfFile, 'a')
         append = True
         # Sort incoming data
         data = data.sort_index()
@@ -133,7 +141,7 @@ class MIDataStore:
     def get(self, table_id):
 
         # Get HDFStore
-        hdfStore = pandas.HDFStore(self.hdfFile, 'r')
+        hdfStore = pd.HDFStore(self.hdfFile, 'r')
         data = None
         try:
             data = hdfStore.get(table_id)
@@ -146,7 +154,7 @@ class MIDataStore:
     def put(self, table_id, data, update=False):
 
         # Get HDFStore
-        hdfStore = pandas.HDFStore(self.hdfFile, 'a')
+        hdfStore = pd.HDFStore(self.hdfFile, 'a')
         print("Request to add data to table: " + table_id, flush=True)
         #print(data, flush=True)
         try:
@@ -167,14 +175,14 @@ class MIDataStore:
     def delete(self, table_id):
 
         # Get HDFStore
-        hdfStore = pandas.HDFStore(self.hdfFile, 'a')
+        hdfStore = pd.HDFStore(self.hdfFile, 'a')
         try:
             hdfStore.remove(table_id)
         finally:
             hdfStore.close()
 
     def getKeys(self):
-        hdfStore = pandas.HDFStore(self.hdfFile, 'r')
+        hdfStore = pd.HDFStore(self.hdfFile, 'r')
         data = None
         try:
             data = [x[1:] for x in hdfStore.keys()]

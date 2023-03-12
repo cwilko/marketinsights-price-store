@@ -1,14 +1,17 @@
 import unittest
 import os
 import json
+import hashlib
 import numpy as np
 import pandas as pd
 from quantutils.api.datasource import MIDataStoreRemote
+from marketinsights.api.aggregator import MarketDataAggregator
 
 dir = os.path.dirname(os.path.abspath(__file__))
+sharedDigest = "024ac9ff95bb1dc73854ea3f257cbc1c"
 
 
-class PriceStoreTest(unittest.TestCase):
+class TestPriceStore(unittest.TestCase):
 
     def setUp(self):
         HOST = os.getenv('HOSTNAME')
@@ -33,11 +36,36 @@ class PriceStoreTest(unittest.TestCase):
 
     def test_store_and_retrieve_data(self):
 
-        self.mds.append("DOW", self.marketData)
+        self.mds.append("TestMarket", self.marketData)
 
-        resultData = self.mds.aggregate("DOW", ["TestSource"])
-        print(self.marketData.compare(resultData))
-        self.assertTrue(self.marketData.equals(resultData))
+        start = "2013-01-01"
+        end = "2013-07-10"
+        resultData = self.mds.aggregate("TestMarket", ["TestSource"], end=end)
+        print(resultData)
+        assert self.marketData.equals(resultData)
+
+    def test_store_MDS_and_aggregate(self):
+
+        OHLCData = pd.read_pickle(dir + "/data/test.pkl")
+        OHLCData = OHLCData.loc[pd.IndexSlice[["D&J-IND", "WallSt-hourly"], :]]
+        self.mds.append("DOW", OHLCData)
+
+        with open(dir + "/data/config_mds.json") as json_file:
+            data_config = json.load(json_file)
+
+        start = "2016-10-05"
+        end = "2016-10-25"
+
+        # Get data from MDS
+        MDS_aggregator = MarketDataAggregator(data_config)
+
+        MDSData = MDS_aggregator.getData("DOW", "D", start, end, debug=False)
+
+        dataHash = hashlib.md5(pd.util.hash_pandas_object(MDSData).values.flatten()).hexdigest()
+        print(MDSData)
+        assert MDSData.shape == (18, 4)
+        # Note this must match the OHLC test hexdigest
+        assert dataHash == sharedDigest
 
 if __name__ == '__main__':
     unittest.main()

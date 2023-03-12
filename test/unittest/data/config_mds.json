@@ -1,0 +1,27 @@
+[
+    {
+        "ID": "MDS",
+        "class": "MDSConnector",
+        "opts": {
+            "remote": true,
+            "location": "http://localhost:8080"
+        },
+        "timezone": "UTC",
+        "markets": [
+            {
+                "ID": "DOW",
+                "sources": [
+                    {
+                        "ID": "WallSt-hourly",
+                        "sample_unit": "H"
+                    },
+                    {
+                        "ID": "D&J-IND",
+                        "sample_unit": "5min"
+                    }
+                ]
+            }
+        ]
+
+    }
+]

@@ -46,8 +46,9 @@ class TestPriceStore(unittest.TestCase):
 
     def test_store_MDS_and_aggregate(self):
 
-        OHLCData = pd.read_pickle(dir + "/data/test.pkl")
-        OHLCData = OHLCData.loc[pd.IndexSlice[["D&J-IND", "WallSt-hourly"], :]]
+        OHLCData = pd.read_pickle(dir + "/data/DOW_pickle")
+        #OHLCData = OHLCData.sort_index().loc[pd.IndexSlice[["D&J-IND", "WallSt-hourly"], "2016-10-04":"2016-10-27"], :]
+        # OHLCData.to_pickle("test3.pkl")
         self.mds.append("DOW", OHLCData)
 
         with open(dir + "/data/config_mds.json") as json_file:

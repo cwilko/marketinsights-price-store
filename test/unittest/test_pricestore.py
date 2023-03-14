@@ -8,7 +8,7 @@ from quantutils.api.datasource import MIDataStoreRemote
 from marketinsights.api.aggregator import MarketDataAggregator
 
 dir = os.path.dirname(os.path.abspath(__file__))
-sharedDigest = "024ac9ff95bb1dc73854ea3f257cbc1c"
+sharedDigest = "a42b8d7f7feca51b5f86bdbb3c3ba0f6"
 
 
 class TestPriceStore(unittest.TestCase):
@@ -47,15 +47,15 @@ class TestPriceStore(unittest.TestCase):
     def test_store_MDS_and_aggregate(self):
 
         OHLCData = pd.read_pickle(dir + "/data/DOW_pickle")
-        #OHLCData = OHLCData.sort_index().loc[pd.IndexSlice[["D&J-IND", "WallSt-hourly"], "2016-10-04":"2016-10-27"], :]
-        # OHLCData.to_pickle("test3.pkl")
+        #OHLCData = OHLCData.sort_index().loc[pd.IndexSlice[["D&J-IND", "WallSt-hourly"], "2016-04-10":"2016-04-27"], :]
+        # OHLCData.to_pickle("DOW_pickle")
         self.mds.append("DOW", OHLCData)
 
         with open(dir + "/data/config_mds.json") as json_file:
             data_config = json.load(json_file)
 
-        start = "2016-10-05"
-        end = "2016-10-25"
+        start = "2016-04-15"
+        end = "2016-04-25"
 
         # Get data from MDS
         MDS_aggregator = MarketDataAggregator(data_config)
@@ -64,7 +64,7 @@ class TestPriceStore(unittest.TestCase):
 
         dataHash = hashlib.md5(pd.util.hash_pandas_object(MDSData).values.flatten()).hexdigest()
         print(MDSData)
-        assert MDSData.shape == (18, 4)
+        assert MDSData.shape == (8, 4)
         # Note this must match the OHLC test hexdigest
         assert dataHash == sharedDigest
 

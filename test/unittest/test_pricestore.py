@@ -4,7 +4,7 @@ import json
 import hashlib
 import numpy as np
 import pandas as pd
-from quantutils.api.datasource import MIDataStoreRemote
+from marketinsights.remote.datastore import MIDataStoreRemote
 from marketinsights.api.aggregator import MarketDataAggregator
 
 dir = os.path.dirname(os.path.abspath(__file__))

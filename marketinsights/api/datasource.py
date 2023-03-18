@@ -1,19 +1,11 @@
 import pandas as pd
 import quantutils.dataset.pipeline as ppl
 from quantutils.core.decorators import synchronized
-from quantutils.api.datasource import MIDataStoreRemote
 import json
 import sys
 
 
 class MIDataStore:
-
-    def __new__(cls, location, remote=False, hdfFile="data.hdf"):
-
-        if (remote):
-            return MIDataStoreRemote(location)
-        else:
-            return super().__new__(cls)
 
     def __init__(self, location, hdfFile="data.hdf"):
         self.hdfFile = location + "/" + hdfFile

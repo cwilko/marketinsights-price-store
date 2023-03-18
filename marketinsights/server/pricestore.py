@@ -5,7 +5,7 @@ import pandas
 import json
 
 # Any change to the following needs a change to the PVC location
-mds = MIDataStore("./datasources")
+mds = MIDataStore(location="./datasources")
 
 api = Api(
     title='Price Store API',
